@@ -41,7 +41,7 @@ export default async function Footer() {
             className="flex h-8 w-max flex-none items-center justify-center rounded-md text-xs text-black"
             aria-label="Deploy on Vercel"
             target="_blank"
-            href="https://github.com/VikasTiwari-Webkul/nextjs-commerce-odoo"
+            href="https://github.com/VikasTiwari-Webkul/odoo-react-nextjs-commerce"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
