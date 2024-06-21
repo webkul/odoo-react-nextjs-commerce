@@ -1,0 +1,137 @@
+'use client';
+import { Checkbox } from '@headlessui/react';
+import { CheckIcon } from '@heroicons/react/16/solid';
+import RegionDropDown from 'components/checkout/region-drop-down';
+import { useFormState } from 'react-dom';
+import { ProceedToCheckout } from '../cart/proceed-to-checkout';
+import Selectbox from '../../form-ui/select-box';
+import InputText from '../../form-ui/input';
+import { useEffect, useState } from 'react';
+import { createShippingAddress } from '../action';
+import TextInputArea from 'components/form-ui/textarea';
+import { ShippingArrayDataType } from 'lib/odoo/types';
+import { isObject } from 'lib/type-guards';
+import { redirect } from 'next/navigation';
+import { getLocalStorage, setLocalStorage } from 'lib/utils';
+import { SAVED_LOCAL_STORAGE } from 'lib/constants';
+
+const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }) => {
+  const values = getLocalStorage(SAVED_LOCAL_STORAGE, true);
+  const initialState = {
+    ...values
+  };
+  const [state, formAction] = useFormState(createShippingAddress, initialState);
+  const [isSaved, setEnabled] = useState(true);
+  useEffect(() => {
+    if (isObject(state?.shippingAddress)) {
+      setLocalStorage(SAVED_LOCAL_STORAGE, { ...state?.shippingAddress, isSaved });
+      redirect('/checkout/shipping');
+    }
+  }, [state, isSaved]);
+
+  return (
+    <form className="my-5" action={formAction}>
+      <div className="flex flex-col gap-3">
+        <h1 className="text-2xl font-bold">Contact</h1>
+        <InputText
+          className="max-w-full"
+          name="email"
+          defaultValue={initialState?.email}
+          errorMsg={state?.errors?.email}
+          label="Enter Email"
+        />
+      </div>
+      <div className="mb-7 mt-3 grid grid-cols-6 gap-4">
+        <h1 className="col-span-6 text-2xl font-bold">Shipping address</h1>
+        <InputText
+          className="col-span-3"
+          name="firstname"
+          defaultValue={initialState?.firstname}
+          errorMsg={state?.errors?.firstname}
+          label="First Name"
+        />
+        <InputText
+          className="col-span-3"
+          name="lastName"
+          label="Last Name"
+          defaultValue={initialState?.lastname}
+        />
+        <InputText
+          className="col-span-6"
+          name="company"
+          label="Company"
+          defaultValue={initialState?.company}
+        />
+
+        <TextInputArea
+          classProps="col-span-3"
+          errorMsg={state?.errors?.address1}
+          placeholder="Enter Address"
+          label="Address"
+          name="address1"
+          defaultValue={initialState?.street?.[0]}
+        />
+        <TextInputArea
+          classProps="col-span-3"
+          placeholder="Apartment, suite, etc (optional)"
+          label="Apartment (optional)"
+          name="address2"
+          defaultValue={initialState?.street?.[1]}
+        />
+        <Selectbox
+          countries={countries}
+          className="col-span-3"
+          nameAttr="country"
+          defaultvalue={initialState?.country?.code || 'US'}
+          label="Country/Region"
+        />
+        <InputText
+          className="col-span-3"
+          name="telephone"
+          label="Telephone"
+          defaultValue={initialState?.telephone}
+          errorMsg={state?.errors?.telephone}
+        />
+
+        <InputText
+          className="col-span-2"
+          name="city"
+          label="City"
+          defaultValue={initialState?.city}
+          errorMsg={state?.errors?.city}
+        />
+        <RegionDropDown
+          countries={countries}
+          className="col-span-2"
+          label="Select Region"
+          nameAttr="region"
+        />
+        <InputText
+          className="col-span-2"
+          name="postcode"
+          label="Zip Code"
+          defaultValue={initialState?.postcode}
+          errorMsg={state?.errors?.postcode}
+        />
+
+        <div className="col-span-6 flex gap-2">
+          <Checkbox
+            checked={isSaved}
+            onChange={setEnabled}
+            className="group size-6 rounded-md bg-white/10 p-1 ring-1 ring-inset ring-gray-400 data-[checked]:bg-black dark:ring-white/15 data-[checked]:dark:bg-white"
+          >
+            <CheckIcon className="hidden size-4 fill-white group-data-[checked]:block dark:fill-black" />
+          </Checkbox>
+          <span className="text-black dark:text-white">Save this information for next time</span>
+        </div>
+        <div className="col-span-6 flex w-full justify-end">
+          <div className="w-full sm:w-2/5">
+            <ProceedToCheckout buttonName="Continue to shipping" />
+          </div>
+        </div>
+      </div>
+    </form>
+  );
+};
+
+export default GuestCheckOutForm;
