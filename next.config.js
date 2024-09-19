@@ -5,7 +5,7 @@ module.exports = {
     ignoreDuringBuilds: true
   },
   images: {
-    unoptimized: false,
+    unoptimized: true,
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
