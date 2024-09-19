@@ -29,4 +29,5 @@ export const HIDDEN_PRODUCT_TAG = 'nextjs-frontend-hidden';
 export const DEFAULT_OPTION = 'Default Title';
 export const SHOPIFY_GRAPHQL_API_ENDPOINT = `/api/${process.env.ODOO_API_VERSION}`;
 export const LIMIT = 12;
+export const TOKEN = 'token';
 export const SAVED_LOCAL_STORAGE = 'shipping_address';

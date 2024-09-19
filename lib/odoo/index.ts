@@ -1,8 +1,8 @@
-import { LIMIT, SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from 'lib/constants';
+import { LIMIT, SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS, TOKEN } from 'lib/constants';
 import { isArray, isObject, isShopifyError } from 'lib/type-guards';
 import { ensureStartsWith } from 'lib/utils';
 import { revalidateTag } from 'next/cache';
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 // import { getProductRecommendationsQuery } from './queries/product';
 import {
@@ -35,7 +35,17 @@ import {
   OdooUpdateCartOperation,
   OdooCountriesOperation,
   ShippingArrayDataType,
-  shippingAddressType
+  shippingAddressType,
+  ShippingMethodType,
+  PaymentMethodType,
+  PlacerOrderInputType,
+  RegisterInputType,
+  RecoverLoginType,
+  ShippingAddressInputType,
+  ShippingMethodDataType,
+  PaymentMethodDataType,
+  PlacerOrderDataType,
+  RegisterDataType
 } from './types';
 
 const domain = process.env.ODOO_STORE_DOMAIN
@@ -53,7 +63,8 @@ export async function odooFetch<T>({
   method = 'GET',
   tags,
   variables,
-  cartId
+  cartId,
+  is_session
 }: {
   cache?: RequestCache;
   headers?: HeadersInit;
@@ -62,14 +73,24 @@ export async function odooFetch<T>({
   tags?: string[];
   variables?: ExtractVariables<T>;
   cartId?: string;
+  is_session?: boolean;
 }): Promise<{ status: number; body: T } | never> {
   try {
+    let session;
+    if (is_session) {
+      session = cookies().get(TOKEN)?.value;
+    }
+
+    if (isObject(headers) && session) {
+      headers['Authorization'] = `bearer ${session}`;
+    }
     const result = await fetch(`${endpoint}/${query}`, {
       method: method,
       headers: {
         'Content-Type': 'application/json',
         cartId: `${cartId ? `${cartId}` : ''}`,
         Authenticate: key,
+        ...(session ? { Authorization: `bearer ${session}` } : {}),
         ...headers
       },
       body:
@@ -210,10 +231,11 @@ export async function createCart(): Promise<CreateCartType> {
   const res = await odooFetch<OdooCreateCartOperation>({
     query: 'create-empty-cart',
     method: 'POST',
-    cache: 'no-store'
+    cache: 'no-store',
+    is_session: true
   });
 
-  return res.body.data.customerCart;
+  return res.body?.data?.customerCart;
 }
 
 export async function addToCart(itemObject: {
@@ -229,10 +251,11 @@ export async function addToCart(itemObject: {
     variables: {
       ...itemObject
     },
-    cache: 'no-store'
+    cache: 'no-store',
+    is_session: true
   });
 
-  return reshapeCart(res.body.customerCart);
+  return reshapeCart(res.body?.customerCart);
 }
 
 export async function removeFromCart(removeCartObj: {
@@ -245,7 +268,8 @@ export async function removeFromCart(removeCartObj: {
     variables: {
       ...removeCartObj
     },
-    cache: 'no-store'
+    cache: 'no-store',
+    is_session: true
   });
 
   return reshapeCart(res.body.removeCart);
@@ -264,7 +288,8 @@ export async function updateCart(updateCartObj: {
     variables: {
       ...updateCartObj
     },
-    cache: 'no-store'
+    cache: 'no-store',
+    is_session: true
   });
 
   return reshapeCart(res.body.updateCart);
@@ -276,7 +301,8 @@ export async function getCart(cartId: string): Promise<Cart | undefined> {
     method: 'GET',
     tags: [TAGS.cart],
     cartId: cartId,
-    cache: 'no-store'
+    cache: 'no-store',
+    is_session: true
   });
 
   // Old carts becomes `null` when you checkout.
@@ -300,7 +326,7 @@ export async function getCollection(handle: string): Promise<Collection | undefi
     }
   });
 
-  return reshapeCollection(res.body.category[0]);
+  return reshapeCollection(res.body.category?.[0]);
 }
 
 export async function getCollectionProducts({
@@ -537,51 +563,69 @@ export async function getCountryList(): Promise<ShippingArrayDataType[]> {
   return res.body?.countries;
 }
 
-export async function addShippingAddress(shippingAddressInput: {
-  cartId: string;
-  input: {
-    email: string;
-    firstname: string;
-    lastname: string;
-    company: string;
-    country_code: string;
-    postcode: string;
-    street: string[];
-    city: string;
-    telephone: string;
-    region: { region: string; region_id: number };
-  };
-}): Promise<any> {
+export async function addShippingAddress(
+  shippingAddressInput: ShippingAddressInputType
+): Promise<shippingAddressType> {
   const res = await odooFetch<shippingAddressType>({
     query: 'add-shipping-address',
     method: 'POST',
     variables: {
       ...shippingAddressInput
     },
-    cache: 'no-store'
+    cache: 'no-store',
+    is_session: true
   });
 
   return res.body;
 }
 
-export async function addShippingMethod(input: any): Promise<any> {
-  const res = await odooFetch<any>({
+export async function addShippingMethod(
+  input: ShippingMethodType
+): Promise<ShippingMethodDataType> {
+  const res = await odooFetch<ShippingMethodDataType>({
     query: 'add-delivery-method',
     method: 'POST',
     variables: {
       ...input
     },
-    cache: 'no-store'
+    cache: 'no-store',
+    is_session: true
   });
 
   return res.body;
-  // revalidateTag(TAGS.cart);
-  // return reshapePayments(res.body.data.paymentMethods);
 }
 
-export async function addPaymentMethod(input: any): Promise<any> {
-  const res = await odooFetch<any>({
+export async function addPaymentMethod(input: PaymentMethodType): Promise<PaymentMethodDataType> {
+  const res = await odooFetch<PaymentMethodDataType>({
     query: 'add-payment-method',
+    method: 'POST',
+    variables: {
+      ...input
+    },
+    cache: 'no-store',
+    is_session: true
+  });
+
+  return res?.body;
+}
+
+export async function createPlaceOrder(input: PlacerOrderInputType): Promise<PlacerOrderDataType> {
+  const res = await odooFetch<PlacerOrderDataType>({
+    query: 'place-order',
+    method: 'POST',
+    variables: {
+      ...input
+    },
+    cache: 'no-store',
+    is_session: true
+  });
+
+  return res.body;
+}
+
+export async function createUserToLogin(input: RegisterInputType): Promise<RegisterDataType> {
+  const res = await odooFetch<RegisterDataType>({
+    query: 'signup',
     method: 'POST',
     variables: {
       ...input
@@ -590,19 +634,17 @@ export async function addPaymentMethod(input: any): Promise<any> {
   });
 
   return res?.body;
-  // return reshapePaymentMethods(res.body.data.savePayment);
 }
 
-export async function createPlaceOrder(input: any): Promise<any> {
-  const res = await odooFetch<any>({
-    query: 'place-order',
+export async function recoverUserLogin(input: { email: string }): Promise<RecoverLoginType> {
+  const res = await odooFetch<RecoverLoginType>({
+    query: 'forgetPassword',
     method: 'POST',
     variables: {
       ...input
     },
     cache: 'no-store'
   });
-
   return res.body;
 }
 

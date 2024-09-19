@@ -11,6 +11,7 @@ import { revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { PaymentMethodType, PlacerOrderInputType, ShippingMethodType } from '~lib/odoo/types';
 
 const schema = z.object({
   email: z
@@ -18,7 +19,6 @@ const schema = z.object({
       required_error: 'Email is required'
     })
     .email('This is not a valid email.'),
-  // country: z.string({ required_error: 'Country is required' }),
   firstname: z
     .string({ required_error: 'First Name is required' })
     .min(1, { message: 'Please Enter First name' }),
@@ -85,7 +85,7 @@ export async function createShippingMethod(prevState: any, formData: FormData) {
     shippingMethods: [{ ...shippingObj }]
   };
 
-  const result = await addShippingMethod(shippingMethods);
+  const result = await addShippingMethod(shippingMethods as ShippingMethodType);
   if (result?.success && isObject(result?.setShippingMethodsOnCart)) {
     revalidateTag(TAGS.cart);
     redirect('/checkout/payment');
@@ -101,13 +101,13 @@ export async function createPaymentMethod(prevState: any, formData: FormData) {
     }
   };
 
-  const result = await addPaymentMethod(input);
+  const result = await addPaymentMethod(input as PaymentMethodType);
   if (result?.success && isObject(result?.setPaymentMethodsOnCart)) {
     const placeOrder = {
       cartId: cartId,
       transaction_id: result?.setPaymentMethodsOnCart?.transaction_id
     };
-    const orderInfo = await createPlaceOrder(placeOrder);
+    const orderInfo = await createPlaceOrder(placeOrder as PlacerOrderInputType);
     if (orderInfo?.success && isObject(orderInfo?.placeOrder)) {
       cookies().set('order_number', orderInfo?.placeOrder?.order.order_number);
       cookies().delete('cartId');
