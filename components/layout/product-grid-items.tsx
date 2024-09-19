@@ -19,7 +19,7 @@ export default function ProductGridItems({ products }: { products: productListTy
                 amount: product.price_range?.minimum_price?.regular_price?.value,
                 currencyCode: product.price_range?.minimum_price?.regular_price?.currency
               }}
-              src={product?.thumbnail?.name}
+              src={product.thumbnail?.name}
               fill
               sizes="(min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
             />

@@ -70,3 +70,14 @@ export const setLocalStorage = (key: string, data: any) => {
     }
   }
 };
+
+export type T = {
+  error: [];
+};
+
+export const formErrorResolver = (error: Array<T>) => {
+  if (isArray(error)) {
+    return error;
+  }
+  return [];
+};

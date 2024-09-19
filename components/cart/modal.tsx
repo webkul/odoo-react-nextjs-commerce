@@ -4,7 +4,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 import Price from 'components/price';
 import { DEFAULT_OPTION } from 'lib/constants';
-import type { Cart, CartItem } from 'lib/odoo/types';
+import type { Cart, CartItem, Window } from 'lib/odoo/types';
 import { createUrl } from 'lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -29,10 +29,9 @@ export default function CartModal({ cart }: { cart: Cart | undefined }) {
     // Open cart modal when quantity changes.
     if (cart?.total_quantity !== quantityRef.current) {
       // But only if it's not already open (quantity also changes when editing items in cart).
-      if (!isOpen) {
+      if (!isOpen && !(window as Window).isLogOutLoading) {
         setIsOpen(true);
       }
-
       // Always update the quantity reference
       quantityRef.current = cart?.total_quantity;
     }
