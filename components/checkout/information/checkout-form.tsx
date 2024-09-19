@@ -11,8 +11,8 @@ import { createShippingAddress } from '../action';
 import TextInputArea from 'components/form-ui/textarea';
 import { ShippingArrayDataType } from 'lib/odoo/types';
 import { isObject } from 'lib/type-guards';
-import { redirect } from 'next/navigation';
-import { getLocalStorage, setLocalStorage } from 'lib/utils';
+import { useRouter } from 'next/navigation';
+import { formErrorResolver, getLocalStorage, setLocalStorage } from 'lib/utils';
 import { SAVED_LOCAL_STORAGE } from 'lib/constants';
 
 const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }) => {
@@ -20,14 +20,15 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
   const initialState = {
     ...values
   };
+  const router = useRouter();
   const [state, formAction] = useFormState(createShippingAddress, initialState);
   const [isSaved, setEnabled] = useState(true);
   useEffect(() => {
     if (isObject(state?.shippingAddress)) {
       setLocalStorage(SAVED_LOCAL_STORAGE, { ...state?.shippingAddress, isSaved });
-      redirect('/checkout/shipping');
+      router.push('/checkout/shipping');
     }
-  }, [state, isSaved]);
+  }, [state, isSaved, router]);
 
   return (
     <form className="my-5" action={formAction}>
@@ -37,7 +38,7 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
           className="max-w-full"
           name="email"
           defaultValue={initialState?.email}
-          errorMsg={state?.errors?.email}
+          errorMsg={formErrorResolver(state?.errors?.email)}
           label="Enter Email"
         />
       </div>
@@ -47,7 +48,7 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
           className="col-span-3"
           name="firstname"
           defaultValue={initialState?.firstname}
-          errorMsg={state?.errors?.firstname}
+          errorMsg={formErrorResolver(state?.errors?.firstname)}
           label="First Name"
         />
         <InputText
@@ -65,11 +66,11 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
 
         <TextInputArea
           classProps="col-span-3"
-          errorMsg={state?.errors?.address1}
           placeholder="Enter Address"
           label="Address"
           name="address1"
           defaultValue={initialState?.street?.[0]}
+          errorMsg={state?.errors?.address1}
         />
         <TextInputArea
           classProps="col-span-3"
@@ -90,7 +91,7 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
           name="telephone"
           label="Telephone"
           defaultValue={initialState?.telephone}
-          errorMsg={state?.errors?.telephone}
+          errorMsg={formErrorResolver(state?.errors?.telephone)}
         />
 
         <InputText
@@ -98,7 +99,7 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
           name="city"
           label="City"
           defaultValue={initialState?.city}
-          errorMsg={state?.errors?.city}
+          errorMsg={formErrorResolver(state?.errors?.city)}
         />
         <RegionDropDown
           countries={countries}
@@ -111,7 +112,7 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
           name="postcode"
           label="Zip Code"
           defaultValue={initialState?.postcode}
-          errorMsg={state?.errors?.postcode}
+          errorMsg={formErrorResolver(state?.errors?.postcode)}
         />
 
         <div className="col-span-6 flex gap-2">

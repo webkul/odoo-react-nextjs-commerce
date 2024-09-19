@@ -13,7 +13,7 @@ export default function InputText({
   className: string;
   label: string;
   name: string;
-  errorMsg?: []; // Make errorMsg prop optional
+  errorMsg?: any[]; // Make errorMsg prop optional
   typeName?: string;
   defaultValue?: string | number;
 }) {
@@ -27,7 +27,7 @@ export default function InputText({
           type={typeName}
           defaultValue={defaultValue}
           className={clsx(
-            'mt-0.5 block w-full rounded-lg border-none bg-slate-200 px-3 py-2 text-sm/6 text-black dark:bg-white/5 dark:text-white',
+            'mt-3 block w-full rounded-lg border-none bg-slate-200 px-3 py-1.5 text-sm/6 text-black dark:bg-white/5 dark:text-white',
             'focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25'
           )}
         />
@@ -43,36 +43,5 @@ export default function InputText({
         </ul>
       )}
     </div>
-
-    // <div className={clsx(' max-w-full ', className)}>
-    //   <Input
-    //     type={typeName}
-    //     size="sm"
-    //     label={label}
-    //     variant="bordered"
-    //     radius="sm"
-    //     name={name}
-    //     color={errorMsg ? 'danger' : 'primary'} // Set color to 'danger' if errorMsg is present
-    //     defaultValue={defaultValue}
-    //     className="max-w-full"
-    //     classNames={{
-    //       base: 'hover:border-primary-500',
-    //       inputWrapper: 'border border-[1px] rounded-md dark:border-gray-700',
-    //       mainWrapper: 'bg-gray-700',
-    //       label: 'text-gray-500'
-    //       // errorMessage: "text-red-500"
-    //     }}
-    //   />
-    //   {isArray(errorMsg) && (
-    //     <ul className="text-danger py-2 text-sm">
-    //       {errorMsg?.map((msg, index) => (
-    //         <div className="flex items-stretch gap-1">
-    //           <ExclamationCircleIcon className="h-5 w-5" />
-    //           <li key={index}>{msg} </li>
-    //         </div>
-    //       ))}
-    //     </ul>
-    //   )}
-    // </div>
   );
 }

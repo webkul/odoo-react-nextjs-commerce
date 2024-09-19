@@ -9,17 +9,13 @@ module.exports = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'cdn.shopify.com',
-        pathname: '/s/files/**'
-      },
-      {
-        protocol: 'https',
         hostname: 'odooheadless-testing.webkul.in'
       }
     ]
   },
   env: {
-    ODOO_API_VERSION: process.env.ODOO_API_VERSION
+    ODOO_API_VERSION: process.env.ODOO_API_VERSION,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET
   },
   async redirects() {
     return [

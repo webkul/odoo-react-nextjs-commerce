@@ -1,4 +1,7 @@
 export type Maybe<T> = T | null;
+export type Window = {
+  isLogOutLoading?: boolean;
+};
 
 export type Connection<T> = {
   items: Array<Edge<T>>;
@@ -332,6 +335,7 @@ export type OdooCart = {
 
 export type shippingAddressType = {
   setShippingMethodsOnCart: OdooCart;
+  success: boolean;
   variables: {
     cartId: string;
     input: {
@@ -384,6 +388,7 @@ export type OdooCartOperation = {
   customerCart: OdooCart;
   variables: {
     cartId: string;
+    is_session: boolean;
   };
 };
 
@@ -626,4 +631,88 @@ export type CountryArrayDataType = {
   code: string;
   name: string;
   states: StateArrayDataType[];
+};
+
+export type ShippingMethodType = {
+  cartId: string;
+  shippingMethods: {
+    carrier_code: string;
+    method_code: string;
+  }[];
+};
+
+export type PaymentMethodType = {
+  cartId: string;
+  paymentMethod: {
+    code: string;
+  };
+};
+
+export type PlacerOrderInputType = {
+  cartId: string;
+  transaction_id: number;
+};
+
+export type RegisterInputType = {
+  firstname: string;
+  lastname: string;
+  email: string;
+  password: string;
+  passwordConfirmation: string;
+};
+
+export type RecoverLoginType = {
+  variables: { email: string };
+  success: boolean;
+  message: string;
+};
+
+export type ShippingAddressInputType = {
+  cartId: string;
+  input: {
+    email: string;
+    firstname: string;
+    lastname: string;
+    company: string;
+    country_code: string;
+    postcode: string;
+    street: string[];
+    city: string;
+    telephone: string;
+    region: { region: string; region_id: number };
+  };
+};
+
+export type ShippingAddressType = {
+  variables: ShippingAddressInputType;
+};
+
+export type ShippingMethodDataType = {
+  variables: ShippingMethodType;
+  success: boolean;
+  setShippingMethodsOnCart: {};
+};
+
+export type PaymentMethodDataType = {
+  variables: PaymentMethodType;
+  success: boolean;
+  setPaymentMethodsOnCart: {
+    transaction_id: number;
+  };
+};
+
+export type PlacerOrderDataType = {
+  variables: PlacerOrderInputType;
+  success: boolean;
+  placeOrder: {
+    order: {
+      order_number: string;
+    };
+  };
+};
+
+export type RegisterDataType = {
+  variables: RegisterInputType;
+  success: boolean;
+  message: string;
 };

@@ -1,0 +1,8 @@
+Legend
+
++ Features
+- Bugs
+
+-------------------------------- Version 1.0.0 -------------------------------------
+	+ Setup the next commerce theme from the Odoo APi's Like Homepage, Product, CMS Page, Menus and category.
+	+ Complete the guest checkout.
