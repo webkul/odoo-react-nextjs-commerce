@@ -39,7 +39,7 @@ export async function ThreeItemGrid({
 }: {
   homeCollection?: OdooPromotionBannerType;
 }) {
-  if (!homeCollection?.items[0] || !homeCollection?.items[1] || !homeCollection?.items[2])
+  if (!homeCollection?.items?.[0] || !homeCollection?.items?.[1] || !homeCollection?.items?.[2])
     return null;
 
   return (

@@ -21,7 +21,9 @@ export default function TextInputArea({
   return (
     <div className={clsx('w-full', classProps)}>
       <Field>
-        {label && <Label className="text-sm/6 font-medium text-white">{label}</Label>}
+        {label && (
+          <Label className="text-sm/6 font-medium text-black dark:text-white">{label}</Label>
+        )}
 
         <Textarea
           placeholder={placeholder}

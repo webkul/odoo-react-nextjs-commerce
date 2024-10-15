@@ -28,7 +28,7 @@ const Label = ({
             currencyCodeClassName="hidden @[275px]/label:inline"
           />
         ) : (
-          <h1 className="flex-none rounded-full bg-blue-600 p-2 text-white">By Now</h1>
+          <h1 className="flex-none rounded-full bg-blue-600 p-2 text-white">Buy Now</h1>
         )}
       </div>
     </div>

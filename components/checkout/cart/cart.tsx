@@ -85,7 +85,7 @@ export default async function Cart() {
             );
           })}
         </ul>
-        <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
+        <div className="min-h-[25dvh] overflow-y-scroll py-4 text-sm text-neutral-500 xl:overflow-hidden dark:text-neutral-400">
           {isArray(cart?.prices.applied_taxes) &&
             cart?.prices.applied_taxes.map((txtPrice, taxIndex) => (
               <div
