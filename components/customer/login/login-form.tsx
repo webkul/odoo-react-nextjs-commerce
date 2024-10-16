@@ -9,7 +9,8 @@ import { signIn } from 'next-auth/react';
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import PassowrdInputText from 'components/form-ui/password-input';
 import { useRouter } from 'next/navigation';
-import { formErrorResolver } from '~lib/utils';
+import { formErrorResolver, removeFromLocalStorage } from '~lib/utils';
+import { SAVED_LOCAL_STORAGE } from '~lib/constants';
 
 const loginDefaultValue = {
   errors: {
@@ -23,6 +24,7 @@ const loginSchema = z.object({
 });
 export function LoginForm() {
   const router = useRouter();
+
   async function authenticate(prevState: any, formData: FormData) {
     try {
       const data = {
@@ -45,6 +47,8 @@ export function LoginForm() {
           if (result?.ok) {
             router.push('/');
           }
+          //------To Remove localstorage to shipping address-------//
+          removeFromLocalStorage(SAVED_LOCAL_STORAGE);
           return {
             errors: {
               apiError: result?.error

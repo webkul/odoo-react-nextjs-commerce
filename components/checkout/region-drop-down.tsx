@@ -21,11 +21,13 @@ export default function Selectbox({
   return (
     <div className={clsx('w-full', className)}>
       <Field disabled={!isArray(stateArray?.available_regions)}>
-        {label && <Label className="text-sm/6 font-medium text-white">{label}</Label>}
+        {label && (
+          <Label className="text-sm/6 font-medium text-black dark:text-white">{label}</Label>
+        )}
         <div className="relative">
           <Select
             className={clsx(
-              'mt-1.5 block w-full appearance-none rounded-lg border-none bg-slate-200 px-3 py-1.5 text-sm/6 text-black dark:bg-white/5 dark:text-white',
+              'mt-3 block w-full appearance-none rounded-lg border-none bg-slate-200 px-3 py-1.5 text-sm/6 text-black dark:bg-white/5 dark:text-white',
               'focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25',
               // Make the text of each option black on Windows
               '*:text-black'
