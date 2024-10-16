@@ -14,12 +14,19 @@ import { isObject } from 'lib/type-guards';
 import { useRouter } from 'next/navigation';
 import { formErrorResolver, getLocalStorage, setLocalStorage } from 'lib/utils';
 import { SAVED_LOCAL_STORAGE } from 'lib/constants';
+import { useSession } from 'next-auth/react';
 
 const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }) => {
   const values = getLocalStorage(SAVED_LOCAL_STORAGE, true);
+  const { data: session } = useSession();
+
   const initialState = {
-    ...values
+    ...values,
+    firstname: values?.firstname || (session?.user?.name ? session.user.name.split(' ')[0] : ''),
+    lastname: values?.lastname || (session?.user?.name ? session.user.name.split(' ')[1] : ''),
+    email: values?.email || session?.user?.email || ''
   };
+
   const router = useRouter();
   const [state, formAction] = useFormState(createShippingAddress, initialState);
   const [isSaved, setEnabled] = useState(true);

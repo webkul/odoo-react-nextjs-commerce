@@ -42,7 +42,7 @@ export async function createShippingAddress(prevState: any, formData: FormData) 
     company: formData.get('company'),
     country_code: formData.get('country'),
     postcode: formData.get('postcode'),
-    street: [formData.get('address1'), formData.get('address2')],
+    street: [formData.get('address1'), formData.get('address2') || formData.get('address1')],
     address1: formData.get('address1'),
     city: formData.get('city'),
     telephone: formData.get('telephone'),
@@ -109,7 +109,7 @@ export async function createPaymentMethod(prevState: any, formData: FormData) {
     };
     const orderInfo = await createPlaceOrder(placeOrder as PlacerOrderInputType);
     if (orderInfo?.success && isObject(orderInfo?.placeOrder)) {
-      cookies().set('order_number', orderInfo?.placeOrder?.order.order_number);
+      cookies().set('order_number', orderInfo?.placeOrder?.order?.order_number);
       cookies().delete('cartId');
       redirect('/success');
     }

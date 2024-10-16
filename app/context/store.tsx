@@ -13,7 +13,7 @@ const GlobalContext = createContext<ContextProps>({
 });
 
 export const GlobalContextProvider = ({ children }: { children: ReactNode }) => {
-  const [countryCode, setCountryCode] = useState('');
+  const [countryCode, setCountryCode] = useState('US');
   return (
     <GlobalContext.Provider value={{ countryCode, setCountryCode }}>
       {children}
