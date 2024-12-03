@@ -40,10 +40,7 @@ export default function ShippingMethod({ cartData }: { cartData: OdooCart | unde
             </tr>
             <tr className="border-b dark:border-gray-700">
               <td className="py-4">Ship to</td>
-              <th
-                scope="row"
-                className="break-all px-6 py-4 font-medium text-gray-900 dark:text-white"
-              >
+              <th scope="row" className="px-6 py-4 font-medium text-gray-900 dark:text-white">
                 {`${shippingAddress?.firstname} ${shippingAddress?.lastname} ${shippingAddress?.company} ${shippingAddress?.street[0]} ${shippingAddress?.street?.[1]} ${shippingAddress?.city} ${shippingAddress?.region?.label} ${shippingAddress?.country?.label} ${shippingAddress?.postcode}`}
               </th>
               <td className="py-4 text-center">
@@ -97,11 +94,11 @@ export default function ShippingMethod({ cartData }: { cartData: OdooCart | unde
               <button className="flex items-center text-blue-600">
                 <RightArrowIcon className="" />
                 <Link href="/checkout/information" className="mx-1 text-sm">
-                  Return to information
+                  Return to Information
                 </Link>
               </button>
               <div className="w-full sm:w-2/5">
-                <ProceedToCheckout buttonName="Continue to payment" />
+                <ProceedToCheckout buttonName="Continue to Payment" />
               </div>
             </div>
           </div>

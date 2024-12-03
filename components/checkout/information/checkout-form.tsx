@@ -134,7 +134,7 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
         </div>
         <div className="col-span-6 flex w-full justify-end">
           <div className="w-full sm:w-2/5">
-            <ProceedToCheckout buttonName="Continue to shipping" />
+            <ProceedToCheckout buttonName="Continue to Shipping" />
           </div>
         </div>
       </div>
