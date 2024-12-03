@@ -31,7 +31,7 @@ export default async function Cart() {
         </div>
         <CartItemAccordian cartItem={cart} />
       </div>
-      <div className="mt-2 hidden max-h-[95dvh] w-full flex-col overflow-hidden bg-transparent px-6 text-sm text-black backdrop-blur-xl lg:flex dark:text-white">
+      <div className="mt-2 hidden max-h-[100dvh] w-full flex-col overflow-hidden bg-transparent px-6 text-sm text-black backdrop-blur-xl lg:flex dark:text-white">
         <ul className="min-h-[74dvh] flex-grow overflow-auto py-4">
           {cart?.lines?.map((item: CartItem, i: number) => {
             const merchandiseSearchParams = {} as MerchandiseSearchParams;
