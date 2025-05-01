@@ -12,7 +12,6 @@ export const config = {
   matcher: ['/customer/:path*']
 };
 
-
 export default withAuth(
   async function middleware(req) {
     const pathName = req.nextUrl.pathname;
