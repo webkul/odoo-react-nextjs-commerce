@@ -6,3 +6,5 @@ Legend
 -------------------------------- Version 1.0.0 -------------------------------------
 	+ Setup the next commerce theme from the Odoo APi's Like Homepage, Product, CMS Page, Menus and category.
 	+ Complete the guest checkout.
+	+ Upgraded Tailwind To Version 4
+	+ Upgraded Next.Js and Related Packages To Latest Version

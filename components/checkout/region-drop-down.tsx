@@ -1,14 +1,14 @@
-import clsx from 'clsx';
-import { isArray } from 'lib/type-guards';
-import { Field, Label, Select } from '@headlessui/react';
-import { ChevronDownIcon } from '@heroicons/react/20/solid';
-import { ShippingArrayDataType } from 'lib/odoo/types';
-import { useGlobalContext } from 'app/context/store';
+import clsx from "clsx";
+import { isArray } from "lib/type-guards";
+import { Field, Label, Select } from "@headlessui/react";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { ShippingArrayDataType } from "lib/odoo/types";
+import { useGlobalContext } from "app/context/store";
 export default function Selectbox({
   countries,
   className,
   label,
-  nameAttr
+  nameAttr,
 }: {
   countries: ShippingArrayDataType[];
   className: string;
@@ -16,21 +16,25 @@ export default function Selectbox({
   nameAttr: string;
 }) {
   const { countryCode } = useGlobalContext();
-  const stateArray = countries.find((country: ShippingArrayDataType) => country.id === countryCode);
+  const stateArray = countries.find(
+    (country: ShippingArrayDataType) => country.id === countryCode,
+  );
 
   return (
-    <div className={clsx('w-full', className)}>
+    <div className={clsx("w-full", className)}>
       <Field disabled={!isArray(stateArray?.available_regions)}>
         {label && (
-          <Label className="text-sm/6 font-medium text-black dark:text-white">{label}</Label>
+          <Label className="font-medium text-black text-sm/6 dark:text-white">
+            {label}
+          </Label>
         )}
         <div className="relative">
           <Select
             className={clsx(
-              'mt-3 block w-full appearance-none rounded-lg border-none bg-slate-200 px-3 py-1.5 text-sm/6 text-black dark:bg-white/5 dark:text-white',
-              'focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25',
+              "mt-3 block w-full appearance-none rounded-lg border-none bg-slate-200 px-3 py-1.5 text-sm/6 text-black dark:bg-white/5 dark:text-white",
+              "focus:outline-hidden data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25",
               // Make the text of each option black on Windows
-              '*:text-black'
+              "*:text-black",
             )}
             name={nameAttr}
           >

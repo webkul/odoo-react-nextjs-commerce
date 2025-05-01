@@ -1,10 +1,10 @@
-'use server';
-import { TOKEN } from 'lib/constants';
-import { createUserToLogin, recoverUserLogin } from 'lib/odoo';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { z } from 'zod';
-import { RegisterInputType } from '~lib/odoo/types';
+"use server";
+import { TOKEN } from "lib/constants";
+import { createUserToLogin, recoverUserLogin } from "lib/odoo";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { z } from "zod";
+import { RegisterInputType } from "~lib/odoo/types";
 
 /**
  *  Define schema and method for create form validation
@@ -15,14 +15,23 @@ import { RegisterInputType } from '~lib/odoo/types';
 
 const schema = z
   .object({
-    email: z.string().email({ message: 'Please enter a valid email.' }).trim(),
-    firstname: z.string().min(2, { message: 'Name must be at least 2 characters long.' }).trim(),
-    password: z.string().min(6, { message: 'Be at least 6 characters long' }).trim(),
-    passwordConfirmation: z.string().min(6, { message: 'Be at least 6 characters long' }).trim()
+    email: z.string().email({ message: "Please enter a valid email." }).trim(),
+    firstname: z
+      .string()
+      .min(2, { message: "Name must be at least 2 characters long." })
+      .trim(),
+    password: z
+      .string()
+      .min(6, { message: "Be at least 6 characters long" })
+      .trim(),
+    passwordConfirmation: z
+      .string()
+      .min(6, { message: "Be at least 6 characters long" })
+      .trim(),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
     message: "Password and confirm password don't match",
-    path: ['confirm']
+    path: ["confirm"],
   });
 
 export type State = {
@@ -39,26 +48,26 @@ export type State = {
 export async function createUser(prevState: State, formData: FormData) {
   // Ensure formData is defined
   const createUserValues = {
-    firstname: formData.get('firstName'),
-    lastname: formData.get('lastName'),
-    email: formData.get('email'),
-    password: formData.get('password'),
-    passwordConfirmation: formData.get('passwordConfirmation')
+    firstname: formData.get("firstName"),
+    lastname: formData.get("lastName"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    passwordConfirmation: formData.get("passwordConfirmation"),
   };
 
   const validatedFields = schema.safeParse(createUserValues);
   if (!validatedFields.success) {
     return {
-      errors: validatedFields.error.flatten().fieldErrors
+      errors: validatedFields.error.flatten().fieldErrors,
     };
   }
   const result = await createUserToLogin(createUserValues as RegisterInputType);
   if (!result?.success) {
     return {
-      errors: { apiError: result?.message }
+      errors: { apiError: result?.message },
     };
   } else {
-    redirect('/customer/login');
+    redirect("/customer/login");
   }
 }
 /**
@@ -68,7 +77,7 @@ export async function createUser(prevState: State, formData: FormData) {
  * @returns
  */
 const forgetSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email.' }).trim()
+  email: z.string().email({ message: "Please enter a valid email." }).trim(),
 });
 
 export type RecoverPasswordType = {
@@ -80,15 +89,18 @@ export type RecoverPasswordType = {
     };
   };
 };
-export async function recoverPassword(prevState: RecoverPasswordType, formData: FormData) {
+export async function recoverPassword(
+  prevState: RecoverPasswordType,
+  formData: FormData,
+) {
   const data = {
-    email: formData.get('email')
+    email: formData.get("email"),
   };
   const validatedFields = forgetSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return {
-      errors: validatedFields.error.flatten().fieldErrors
+      errors: validatedFields.error.flatten().fieldErrors,
     };
   }
 
@@ -98,32 +110,32 @@ export async function recoverPassword(prevState: RecoverPasswordType, formData: 
       errors: {
         apiRes: {
           status: false,
-          msg: result?.message
-        }
-      }
+          msg: result?.message,
+        },
+      },
     };
   }
   return {
     errors: {
       apiRes: {
         status: true,
-        msg: result?.message
-      }
-    }
+        msg: result?.message,
+      },
+    },
   };
 }
 
 export async function userLogoOut() {
   try {
-    cookies().delete(TOKEN);
+    (await cookies()).delete(TOKEN);
     return {
       error: false,
-      success: true
+      success: true,
     };
   } catch (e) {
     return {
       error: true,
-      success: false
+      success: false,
     };
   }
 }

@@ -1,39 +1,52 @@
-'use client';
-import { Checkbox } from '@headlessui/react';
-import { CheckIcon } from '@heroicons/react/16/solid';
-import RegionDropDown from 'components/checkout/region-drop-down';
-import { useFormState } from 'react-dom';
-import { ProceedToCheckout } from '../cart/proceed-to-checkout';
-import Selectbox from '../../form-ui/select-box';
-import InputText from '../../form-ui/input';
-import { useEffect, useState } from 'react';
-import { createShippingAddress } from '../action';
-import TextInputArea from 'components/form-ui/textarea';
-import { ShippingArrayDataType } from 'lib/odoo/types';
-import { isObject } from 'lib/type-guards';
-import { useRouter } from 'next/navigation';
-import { formErrorResolver, getLocalStorage, setLocalStorage } from 'lib/utils';
-import { SAVED_LOCAL_STORAGE } from 'lib/constants';
-import { useSession } from 'next-auth/react';
+"use client";
+import { Checkbox } from "@headlessui/react";
+import { CheckIcon } from "@heroicons/react/16/solid";
+import RegionDropDown from "components/checkout/region-drop-down";
+import { ProceedToCheckout } from "../cart/proceed-to-checkout";
+import Selectbox from "../../form-ui/select-box";
+import InputText from "../../form-ui/input";
+import { useActionState, useEffect, useState } from "react";
+import { createShippingAddress } from "../action";
+import TextInputArea from "components/form-ui/textarea";
+import { ShippingArrayDataType } from "lib/odoo/types";
+import { isObject } from "lib/type-guards";
+import { useRouter } from "next/navigation";
+import { formErrorResolver, getLocalStorage, setLocalStorage } from "lib/utils";
+import { SAVED_LOCAL_STORAGE } from "lib/constants";
+import { useSession } from "next-auth/react";
 
-const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }) => {
+const GuestCheckOutForm = ({
+  countries,
+}: {
+  countries: ShippingArrayDataType[];
+}) => {
   const values = getLocalStorage(SAVED_LOCAL_STORAGE, true);
   const { data: session } = useSession();
 
   const initialState = {
     ...values,
-    firstname: values?.firstname || (session?.user?.name ? session.user.name.split(' ')[0] : ''),
-    lastname: values?.lastname || (session?.user?.name ? session.user.name.split(' ')[1] : ''),
-    email: values?.email || session?.user?.email || ''
+    firstname:
+      values?.firstname ||
+      (session?.user?.name ? session.user.name.split(" ")[0] : ""),
+    lastname:
+      values?.lastname ||
+      (session?.user?.name ? session.user.name.split(" ")[1] : ""),
+    email: values?.email || session?.user?.email || "",
   };
 
   const router = useRouter();
-  const [state, formAction] = useFormState(createShippingAddress, initialState);
+  const [state, formAction] = useActionState(
+    createShippingAddress,
+    initialState,
+  );
   const [isSaved, setEnabled] = useState(true);
   useEffect(() => {
     if (isObject(state?.shippingAddress)) {
-      setLocalStorage(SAVED_LOCAL_STORAGE, { ...state?.shippingAddress, isSaved });
-      router.push('/checkout/shipping');
+      setLocalStorage(SAVED_LOCAL_STORAGE, {
+        ...state?.shippingAddress,
+        isSaved,
+      });
+      router.push("/checkout/shipping");
     }
   }, [state, isSaved, router]);
 
@@ -49,7 +62,7 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
           label="Enter Email"
         />
       </div>
-      <div className="mb-7 mt-3 grid grid-cols-6 gap-4">
+      <div className="grid grid-cols-6 gap-4 mt-3 mb-7">
         <h1 className="col-span-6 text-2xl font-bold">Shipping address</h1>
         <InputText
           className="col-span-3"
@@ -90,7 +103,7 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
           countries={countries}
           className="col-span-3"
           nameAttr="country"
-          defaultvalue={initialState?.country?.code || 'US'}
+          defaultvalue={initialState?.country?.code || "US"}
           label="Country/Region"
         />
         <InputText
@@ -122,7 +135,7 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
           errorMsg={formErrorResolver(state?.errors?.postcode)}
         />
 
-        <div className="col-span-6 flex gap-2">
+        <div className="flex col-span-6 gap-2">
           <Checkbox
             checked={isSaved}
             onChange={setEnabled}
@@ -130,9 +143,11 @@ const GuestCheckOutForm = ({ countries }: { countries: ShippingArrayDataType[] }
           >
             <CheckIcon className="hidden size-4 fill-white group-data-[checked]:block dark:fill-black" />
           </Checkbox>
-          <span className="text-black dark:text-white">Save this information for next time</span>
+          <span className="text-black dark:text-white">
+            Save this information for next time
+          </span>
         </div>
-        <div className="col-span-6 flex w-full justify-end">
+        <div className="flex justify-end w-full col-span-6">
           <div className="w-full sm:w-2/5">
             <ProceedToCheckout buttonName="Continue to Shipping" />
           </div>

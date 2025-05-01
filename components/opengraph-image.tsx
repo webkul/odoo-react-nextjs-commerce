@@ -1,18 +1,22 @@
-import { ImageResponse } from 'next/og';
-import LogoIcon from './icons/logo';
-
+import { ImageResponse } from "next/og";
+import LogoIcon from "./icons/logo";
+import { join } from "path";
+import { readFile } from "fs/promises";
 export type Props = {
   title?: string;
 };
 
-export default async function OpengraphImage(props?: Props): Promise<ImageResponse> {
+export default async function OpengraphImage(
+  props?: Props,
+): Promise<ImageResponse> {
   const { title } = {
     ...{
-      title: process.env.SITE_NAME
+      title: process.env.SITE_NAME,
     },
-    ...props
+    ...props,
   };
-
+  const file = await readFile(join(process.cwd(), "./fonts/Inter-Bold.ttf"));
+  const font = Uint8Array.from(file).buffer;
   return new ImageResponse(
     (
       <div tw="flex h-full w-full flex-col items-center justify-center bg-black">
@@ -27,14 +31,12 @@ export default async function OpengraphImage(props?: Props): Promise<ImageRespon
       height: 630,
       fonts: [
         {
-          name: 'Inter',
-          data: await fetch(new URL('../fonts/Inter-Bold.ttf', import.meta.url)).then((res) =>
-            res.arrayBuffer()
-          ),
-          style: 'normal',
-          weight: 700
-        }
-      ]
-    }
+          name: "Inter",
+          data: font,
+          style: "normal",
+          weight: 700,
+        },
+      ],
+    },
   );
 }
