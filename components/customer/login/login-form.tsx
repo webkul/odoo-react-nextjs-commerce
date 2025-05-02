@@ -20,10 +20,7 @@ const loginDefaultValue = {
 };
 const loginSchema = z.object({
   username: z.string().email({ message: "Please enter a valid email." }).trim(),
-  password: z
-    .string()
-    .min(6, { message: "Be at least 6 characters long" })
-    .trim(),
+  password: z.string().min(6, { message: "Be at least 6 characters long" }).trim(),
 });
 export function LoginForm() {
   const router = useRouter();
@@ -41,16 +38,17 @@ export function LoginForm() {
           errors: validatedFields.error.flatten().fieldErrors,
         };
       }
+     
       return await signIn("credentials", {
         redirect: false,
         ...data,
         callbackUrl: "/",
       })
         .then((result) => {
+          
           if (result?.ok) {
             router.push("/");
           }
-          //------To Remove localstorage to shipping address-------//
           removeFromLocalStorage(SAVED_LOCAL_STORAGE);
           return {
             errors: {
@@ -65,26 +63,18 @@ export function LoginForm() {
       console.error("Something went wrong :", error);
     }
   }
-  const [status, dispatch] = useActionState<any, FormData>(
-    authenticate,
-    loginDefaultValue,
-  );
+  const [status, dispatch] = useActionState<any, FormData>(authenticate, loginDefaultValue);
 
   return (
     <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
       <div className="px-4 py-8 bg-white shadow-sm sm:rounded-lg sm:px-10 dark:bg-black">
         <div className="pb-6 sm:mx-auto sm:w-full sm:max-w-md">
-          <h2 className="py-1 text-2xl font-bold text-center">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-sm text-center">
-            If you have an account, sign in with your email address.
-          </p>
+          <h2 className="py-1 text-2xl font-bold text-center">Sign in to your account</h2>
+          <p className="mt-2 text-sm text-center">If you have an account, sign in with your email address.</p>
         </div>
         {status?.errors?.apiError && (
-          <div className="flex items-start justify-start gap-1 mb-4 text-red-500 text-md">
-            <ExclamationCircleIcon className="w-5 h-5" />{" "}
-            {status?.errors?.apiError}
+          <div className="flex items-start justify-center text-sm text-center gap-1 mb-4 text-red-500 text-md">
+            <ExclamationCircleIcon className="w-5 h-5" /> {status?.errors?.apiError}
           </div>
         )}
         <form className="flex flex-col gap-y-4" action={dispatch}>
@@ -106,10 +96,7 @@ export function LoginForm() {
           </div>
           <div className="flex items-center justify-end">
             <div className="text-sm">
-              <Link
-                href="/customer/forget-password"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
+              <Link href="/customer/forget-password" className="font-medium text-blue-600 hover:text-blue-500">
                 Forgot your password?
               </Link>
             </div>
@@ -122,10 +109,7 @@ export function LoginForm() {
           <div className="text-sm">
             <span className="px-2">
               New customer?{" "}
-              <Link
-                href="/customer/register"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
+              <Link href="/customer/register" className="font-medium text-blue-600 hover:text-blue-500">
                 Create your account
               </Link>
             </span>

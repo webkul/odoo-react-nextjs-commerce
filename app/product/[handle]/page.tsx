@@ -18,7 +18,6 @@ export async function generateMetadata(props: {
   if (!isObject(products?.[0])) return notFound();
   const product = products?.[0];
   const { name, label: alt } = product.thumbnail || {};
-  // const indexable = !product?.tags?.includes(HIDDEN_PRODUCT_TAG);
   const url = name;
   const width = 100;
   const height = 100;
@@ -26,14 +25,6 @@ export async function generateMetadata(props: {
   return {
     title: product.name || product.sku,
     description: product.description || product.short_description,
-    // robots: {
-    //   index: indexable,
-    //   follow: indexable,
-    //   googleBot: {
-    //     index: indexable,
-    //     follow: indexable
-    //   }
-    // },
     openGraph: url
       ? {
           images: [
@@ -84,10 +75,10 @@ export default async function ProductPage(props: {
         }}
       />
       <Navbar />
-      <div className="max-w-(--breakpoint-2xl) mx-auto px-4">
+      <div className="max-w-(--breakpoint-2xl) pb-8 min-h-[calc(100vh-388px)] mx-auto px-4">
         {" "}
         <div className="flex flex-col p-8 bg-white border rounded-lg border-neutral-200 md:p-12 lg:flex-row lg:gap-8 dark:border-neutral-800 dark:bg-black">
-          <div className="w-full h-full basis-full lg:basis-4/6">
+          <div className="w-full h-full basis-full pb-6 lg:pb-0 lg:basis-4/6">
             <Suspense
               fallback={
                 <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />

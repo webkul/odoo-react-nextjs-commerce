@@ -42,7 +42,7 @@ export default function TextInputArea({
             {errorMsg?.map((msg: string, index: number) => (
               <div
                 key={index}
-                className="flex items-stretch gap-1 text-red-500"
+                className="flex items-stretch gap-1 text-sm text-red-500"
               >
                 <ExclamationCircleIcon className="w-5 h-5" />
                 <li key={index}>{msg} </li>

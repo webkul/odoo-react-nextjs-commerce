@@ -9,8 +9,8 @@ export async function Carousel({ homeCollection }: { homeCollection: OdooFeature
   if (!isObject(homeCollection)) return null;
   const carouselProducts = homeCollection?.productList;
   return (
-    <div className="hiddenScrollBar w-full overflow-x-auto pb-6 pt-1">
-      <ul className="flex animate-carousel gap-4">
+    <div className="hiddenScrollBar px-px w-full overflow-x-auto pb-6 pt-1">
+      <ul className="flex w-full animate-carousel gap-4">
         {isArray(carouselProducts) &&
           carouselProducts.map((product) => {
             return (
@@ -34,6 +34,7 @@ export async function Carousel({ homeCollection }: { homeCollection: OdooFeature
               </li>
             );
           })}
+          
       </ul>
     </div>
   );

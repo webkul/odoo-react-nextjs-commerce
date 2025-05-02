@@ -9,7 +9,6 @@ export default async function Information() {
 
   return (
     <Suspense fallback={<FormPlaceHolder />}>
-      {" "}
       <GuestCheckOutForm countries={countryList} />
     </Suspense>
   );

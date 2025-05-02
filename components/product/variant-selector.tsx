@@ -60,15 +60,6 @@ export function VariantSelector({
           optionSearchParams.set(optionNameLowerCase, value?.label);
           const optionUrl = createUrl(pathname, optionSearchParams);
 
-          // In order to determine if an option is available for sale, we need to:
-
-          // 1. Filter out all other param state
-          // 2. Filter out invalid options
-          // 3. Check if the option combination is available for sale
-
-          // This is the "magic" that will cross check possible variant combinations and preemptively
-          // disable combinations that are not available. For example, if the color gray is only available in size medium,
-          // then all other sizes should be disabled.
 
           const filtered = Array.from(optionSearchParams.entries()).filter(
             ([key, value]) =>

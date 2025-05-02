@@ -24,7 +24,9 @@
     clip-path: inset(0.6px);
   }
 }
-
+@theme{
+  --breakpoint-2xl:106rem;
+}
 a,
 input,
 button {
@@ -47,4 +49,15 @@ button {
 
 .hiddenScrollBar::-webkit-scrollbar {
   @apply my-5 h-[6px] cursor-pointer bg-gray-300;
+}
+.animate-carousel {
+  animation: marquee 30s linear infinite;
+}
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }

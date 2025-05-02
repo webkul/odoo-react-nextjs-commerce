@@ -1,5 +1,5 @@
 import { TOKEN } from "lib/constants";
-import { odooFetch } from "lib/odoo";
+import { createCart, getCart, odooFetch } from "lib/odoo";
 import { isObject } from "lib/type-guards";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -12,15 +12,12 @@ export const authOptions: NextAuthOptions = {
         username: { label: "username", type: "username" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (
-        credentials: Record<"password" | "username", string> | undefined,
-      ): Promise<any> => {
+      authorize: async (credentials: Record<"password" | "username", string> | undefined): Promise<any> => {
         /* Getting Token from generateCustomerToken */
         const input = {
           email: credentials?.username,
           password: credentials?.password,
         };
-
         try {
           const res = await odooFetch<any>({
             query: "login",
@@ -29,15 +26,14 @@ export const authOptions: NextAuthOptions = {
               ...input,
             },
           });
-
-          if (
-            res?.status === 200 &&
-            res?.body?.success &&
-            res?.body?.authorization &&
-            res?.body?.email
-          ) {
+          if (res?.status === 200 && res?.body?.success && res?.body?.authorization && res?.body?.email) {
             const customerInfo = res?.body;
             (await cookies()).set(TOKEN, customerInfo?.authorization);
+            (await cookies()).delete("order_number");
+            const cart = await createCart();
+            const cartId = cart.id;
+            (await cookies()).set("cartId", cartId, { httpOnly: true, secure: false });
+            await getCart();
             return {
               firstname: customerInfo.firstName,
               lastname: customerInfo.lastName,
@@ -49,9 +45,7 @@ export const authOptions: NextAuthOptions = {
             throw new Error(res?.body?.message || "Something went wrong!");
           }
         } catch (error: any) {
-          throw new Error(
-            (error?.message as string) || "Something went wrong!",
-          );
+          throw new Error((error?.message as string) || "Something went wrong!");
         }
       },
     }),

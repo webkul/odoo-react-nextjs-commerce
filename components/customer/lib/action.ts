@@ -1,6 +1,6 @@
 "use server";
 import { TOKEN } from "lib/constants";
-import { createUserToLogin, recoverUserLogin } from "lib/odoo";
+import { createCart, createUserToLogin, getCart, recoverUserLogin } from "lib/odoo";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -16,18 +16,9 @@ import { RegisterInputType } from "~lib/odoo/types";
 const schema = z
   .object({
     email: z.string().email({ message: "Please enter a valid email." }).trim(),
-    firstname: z
-      .string()
-      .min(2, { message: "Name must be at least 2 characters long." })
-      .trim(),
-    password: z
-      .string()
-      .min(6, { message: "Be at least 6 characters long" })
-      .trim(),
-    passwordConfirmation: z
-      .string()
-      .min(6, { message: "Be at least 6 characters long" })
-      .trim(),
+    firstname: z.string().min(2, { message: "Name must be at least 2 characters long." }).trim(),
+    password: z.string().min(6, { message: "Be at least 6 characters long" }).trim(),
+    passwordConfirmation: z.string().min(6, { message: "Be at least 6 characters long" }).trim(),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
     message: "Password and confirm password don't match",
@@ -89,10 +80,7 @@ export type RecoverPasswordType = {
     };
   };
 };
-export async function recoverPassword(
-  prevState: RecoverPasswordType,
-  formData: FormData,
-) {
+export async function recoverPassword(prevState: RecoverPasswordType, formData: FormData) {
   const data = {
     email: formData.get("email"),
   };
@@ -128,6 +116,11 @@ export async function recoverPassword(
 export async function userLogoOut() {
   try {
     (await cookies()).delete(TOKEN);
+    (await cookies()).delete("order_number");
+    const cart = await createCart();
+    const cartId = cart.id;
+    (await cookies()).set("cartId", cartId, { httpOnly: true, secure: false });
+    await getCart();
     return {
       error: false,
       success: true,

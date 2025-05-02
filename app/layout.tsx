@@ -23,6 +23,8 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
+
+
   return (
     <html lang="en" className={GeistSans.variable}>
       <body className="text-black bg-neutral-50 selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white">

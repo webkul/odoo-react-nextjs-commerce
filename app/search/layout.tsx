@@ -17,7 +17,7 @@ export default function SearchLayout({
         <div className="order-first w-full flex-none md:max-w-[125px]">
           <Collections />
         </div>
-        <div className="order-last w-full min-h-screen md:order-none">
+        <div className="order-last w-full min-h-[calc(100vh-388px)] md:order-none">
           {" "}
           <Suspense fallback={null}>{children}</Suspense>
         </div>

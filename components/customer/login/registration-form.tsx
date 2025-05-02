@@ -21,7 +21,6 @@ export default function RegistrationForm() {
     createUser,
     initialState,
   );
-  console.log(status);
   return (
     <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-lg">
       <div className="px-4 py-8 bg-white shadow-sm sm:rounded-lg sm:px-10 dark:bg-black">
@@ -32,8 +31,8 @@ export default function RegistrationForm() {
           </p>
         </div>
         {status?.errors?.apiError && (
-          <div className="flex items-center gap-1 mb-4 text-red-500 text-md">
-            <ExclamationCircleIcon className="w-6 h-6" />{" "}
+          <div className="flex items-center gap-1 justify-center text-sm text-center mb-4 text-red-500 text-md">
+            <ExclamationCircleIcon className="w-5 h-5" />{" "}
             {status?.errors?.apiError && status?.errors?.apiError}
           </div>
         )}

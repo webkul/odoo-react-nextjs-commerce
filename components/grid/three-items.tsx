@@ -59,7 +59,7 @@ export async function ThreeItemGrid({
     return null;
 
   return (
-    <section className="mx-auto grid max-w-(--breakpoint-2xl) gap-4 px-4 pb-4 md:grid-cols-6 md:grid-rows-2">
+    <section className="mx-auto grid md:max-h-[716px] max-w-(--breakpoint-2xl) gap-4 px-4 pb-4 md:grid-cols-6 md:grid-rows-2">
       <ThreeItemGridItem
         size="full"
         item={homeCollection?.items[0]}

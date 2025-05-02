@@ -30,7 +30,7 @@ export function ForgetPasswordForm() {
       <div className="px-4 py-8 bg-white shadow-sm sm:rounded-lg sm:px-10 dark:bg-black">
         {isObject(errorStatus?.errors?.apiRes) && (
           <div
-            className={`text-md flex items-start gap-1 pb-2 ${
+            className={`text-sm flex items-start justify-center text-center gap-1 pb-2 ${
               errorStatus?.errors?.apiRes?.status
                 ? "text-green-500"
                 : " text-red-600"
@@ -58,8 +58,6 @@ export function ForgetPasswordForm() {
         <form
           className="flex flex-col gap-y-4"
           action={formAction}
-          method="POST"
-          encType="multipart/form-data"
         >
           <div className="mt-1">
             <InputText

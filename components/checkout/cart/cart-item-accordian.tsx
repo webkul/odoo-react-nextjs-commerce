@@ -1,28 +1,19 @@
 "use client";
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-  Transition,
-} from "@headlessui/react";
+import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/24/outline";
 import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
 import { createUrl } from "lib/utils";
-import Image from "next/image";
 import Link from "next/link";
 import ShoppingCartIcon from "../../icons/shopping-cart";
 import { CartItem, OdooCart } from "lib/odoo/types";
 import { isArray, isObject } from "lib/type-guards";
+import Thumbnail from "~components/product/Thumbnail";
 
 type MerchandiseSearchParams = {
   [key: string]: string;
 };
-export default function CartItemAccordian({
-  cartItem,
-}: {
-  cartItem: OdooCart | undefined;
-}) {
+export default function CartItemAccordian({ cartItem }: { cartItem: OdooCart | undefined }) {
   return (
     <div className="w-full mx-auto bg-white/80 dark:bg-transparent">
       <Disclosure>
@@ -51,9 +42,7 @@ export default function CartItemAccordian({
                 <Price
                   className="text-base font-extrabold text-right text-black dark:text-white"
                   amount={cartItem?.prices?.grand_total?.value || 0}
-                  currencyCode={
-                    cartItem?.prices?.grand_total?.currency || "USD"
-                  }
+                  currencyCode={cartItem?.prices?.grand_total?.currency || "USD"}
                 />
               </div>
             </DisclosureButton>
@@ -69,22 +58,17 @@ export default function CartItemAccordian({
                 <div className="flex flex-col justify-between h-full p-1 overflow-hidden">
                   <ul className="py-4 overflow-auto grow m">
                     {cartItem?.items?.map((item: CartItem, i: number) => {
-                      const merchandiseSearchParams =
-                        {} as MerchandiseSearchParams;
+                      const merchandiseSearchParams = {} as MerchandiseSearchParams;
 
-                      item.configurable_options.forEach(
-                        ({ option_label, value_label }) => {
-                          if (value_label !== DEFAULT_OPTION) {
-                            merchandiseSearchParams[
-                              option_label.toLowerCase()
-                            ] = value_label;
-                          }
-                        },
-                      );
+                      item.configurable_options.forEach(({ option_label, value_label }) => {
+                        if (value_label !== DEFAULT_OPTION) {
+                          merchandiseSearchParams[option_label.toLowerCase()] = value_label;
+                        }
+                      });
 
                       const merchandiseUrl = createUrl(
                         `/product/${item.product.url_key}`,
-                        new URLSearchParams(merchandiseSearchParams),
+                        new URLSearchParams(merchandiseSearchParams)
                       );
                       return (
                         <li key={i} className="flex flex-col w-full">
@@ -94,33 +78,20 @@ export default function CartItemAccordian({
                                 {item.quantity}
                               </span>
                             </div>
-                            <Link
-                              href={merchandiseUrl}
-                              className="z-30 flex flex-row items-center gap-x-4"
-                            >
+                            <Link href={merchandiseUrl} className="z-30 flex flex-row items-center gap-x-4">
                               <div className="relative w-16 h-16 overflow-hidden border rounded-md cursor-pointer border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
-                                <Image
+                                <Thumbnail
                                   className="object-cover w-full h-full"
                                   width={64}
                                   height={64}
-                                  alt={
-                                    item.product.thumbnail.label ||
-                                    item.product.name
-                                  }
-                                  src={
-                                    item.product.thumbnail.url ||
-                                    "/image/placeholder.webp"
-                                  }
+                                  alt={item.product.thumbnail.label || item.product.name}
+                                  src={item.product.thumbnail.url}
                                 />
                               </div>
                               <div className="flex flex-col flex-1 text-base">
-                                <span className="leading-tight">
-                                  {item.product.name}
-                                </span>
+                                <span className="leading-tight">{item.product.name}</span>
                                 {item.product.name !== DEFAULT_OPTION ? (
-                                  <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                    {item.product.sku}
-                                  </p>
+                                  <p className="text-sm text-neutral-500 dark:text-neutral-400">{item.product.sku}</p>
                                 ) : null}
                               </div>
                             </Link>
@@ -128,9 +99,7 @@ export default function CartItemAccordian({
                               <Price
                                 className="flex justify-end text-sm text-right gap-y-2"
                                 amount={item?.product.prices.price.value}
-                                currencyCode={
-                                  item?.product.prices.price.currency
-                                }
+                                currencyCode={item?.product.prices.price.currency}
                               />
                             </div>
                           </div>
@@ -140,53 +109,34 @@ export default function CartItemAccordian({
                   </ul>
                   <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                     {isArray(cartItem?.prices.applied_taxes) &&
-                      cartItem?.prices.applied_taxes.map(
-                        (txtPrice, taxIndex) => (
-                          <div
-                            key={taxIndex}
-                            className="flex items-center justify-between pb-1 mb-3 border-b border-neutral-200 dark:border-neutral-700"
-                          >
-                            <p>
-                              {isObject(txtPrice) &&
-                                txtPrice.name[0]?.toUpperCase() +
-                                  txtPrice.name.slice(1)}
-                            </p>
-                            <Price
-                              className="text-base text-right text-black dark:text-white"
-                              amount={txtPrice.value}
-                              currencyCode={txtPrice.currency}
-                            />
-                          </div>
-                        ),
-                      )}
+                      cartItem?.prices.applied_taxes.map((txtPrice, taxIndex) => (
+                        <div
+                          key={taxIndex}
+                          className="flex items-center justify-between pb-1 mb-3 border-b border-neutral-200 dark:border-neutral-700"
+                        >
+                          <p>{isObject(txtPrice) && txtPrice.name[0]?.toUpperCase() + txtPrice.name.slice(1)}</p>
+                          <Price
+                            className="text-base text-right text-black dark:text-white"
+                            amount={txtPrice.value}
+                            currencyCode={txtPrice.currency}
+                          />
+                        </div>
+                      ))}
                     <div className="flex items-center justify-between pb-1 mb-3">
                       <p>Subtotal</p>
                       <Price
                         className="text-base text-right text-black dark:text-white"
-                        amount={
-                          cartItem?.prices?.subtotal_excluding_tax?.value || 0
-                        }
-                        currencyCode={
-                          cartItem?.prices?.subtotal_excluding_tax?.currency ||
-                          "USD"
-                        }
+                        amount={cartItem?.prices?.subtotal_excluding_tax?.value || 0}
+                        currencyCode={cartItem?.prices?.subtotal_excluding_tax?.currency || "USD"}
                       />
                     </div>
                     <div className="flex items-center justify-between pt-1 pb-1 mb-3">
                       <p>Shipping</p>
-                      {isObject(
-                        cartItem?.shipping_address?.selected_shipping_method,
-                      ) ? (
+                      {isObject(cartItem?.shipping_address?.selected_shipping_method) ? (
                         <Price
                           className="text-base text-right text-black dark:text-white"
-                          amount={
-                            cartItem?.shipping_address?.selected_shipping_method
-                              ?.amount?.value || 0
-                          }
-                          currencyCode={
-                            cartItem?.shipping_address?.selected_shipping_method
-                              ?.amount?.currency || "USD"
-                          }
+                          amount={cartItem?.shipping_address?.selected_shipping_method?.amount?.value || 0}
+                          currencyCode={cartItem?.shipping_address?.selected_shipping_method?.amount?.currency || "USD"}
                         />
                       ) : (
                         <p className="text-right">Calculated at next step</p>
@@ -197,9 +147,7 @@ export default function CartItemAccordian({
                       <Price
                         className="text-base text-right text-black dark:text-white"
                         amount={cartItem?.prices.grand_total.value || 0}
-                        currencyCode={
-                          cartItem?.prices.grand_total.currency || "USD"
-                        }
+                        currencyCode={cartItem?.prices.grand_total.currency || "USD"}
                       />
                     </div>
                   </div>
