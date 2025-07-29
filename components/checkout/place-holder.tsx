@@ -1,6 +1,6 @@
 const FormPlaceHolder = () => {
   return (
-    <section className="md:min-w-xl lg:min-w-2xl min-h-[70dvh] w-auto ">
+    <section className="md:min-w-xl lg:min-w-2xl min-h-[70dvh] w-auto ml-4">
       <div role="status" className="my-12 flex w-full animate-pulse flex-col gap-4">
         <div className="h-12 w-full rounded-md bg-gray-200 dark:bg-gray-700"></div>
         <div className="h-4 w-3/4 rounded-md bg-gray-200 dark:bg-gray-700"></div>

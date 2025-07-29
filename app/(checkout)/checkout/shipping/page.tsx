@@ -1,22 +1,24 @@
-import FormPlaceHolder from 'components/checkout/place-holder';
-import { getCart } from 'lib/odoo';
-import type { Metadata } from 'next';
-import dynamic from 'next/dynamic';
-import { cookies } from 'next/headers';
-const ShippingMethod = dynamic(() => import('components/checkout/shipping'), {
-  loading: () => <FormPlaceHolder />,
-  ssr: false
-});
+import FormPlaceHolder from "components/checkout/place-holder";
+import { getCart } from "lib/odoo";
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import { Suspense } from "react";
+import ShippingMethod from "~components/checkout/shipping";
+
 const Shipping = async () => {
-  const cartId = cookies().get('cartId')?.value;
+  const cartId = (await cookies()).get("cartId")?.value;
   let cart;
   if (cartId) {
-    cart = await getCart(cartId);
+    cart = await getCart();
   }
-  return <ShippingMethod cartData={cart} />;
+  return (
+    <Suspense fallback={<FormPlaceHolder />}>
+      <ShippingMethod cartData={cart} />
+    </Suspense>
+  );
 };
 export default Shipping;
 export const metadata: Metadata = {
-  title: 'Checkout',
-  description: 'Checkout with store items'
+  title: "Checkout",
+  description: "Checkout with store items",
 };

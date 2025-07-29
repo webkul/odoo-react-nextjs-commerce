@@ -1,9 +1,18 @@
-import { LIMIT, SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS, TOKEN } from 'lib/constants';
-import { isArray, isObject, isShopifyError } from 'lib/type-guards';
-import { ensureStartsWith } from 'lib/utils';
-import { revalidateTag } from 'next/cache';
-import { cookies, headers } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import {
+  LIMIT,
+  SHOPIFY_GRAPHQL_API_ENDPOINT,
+  TAGS,
+  TOKEN,
+} from "lib/constants";
+import { isArray, isObject, isShopifyError } from "lib/type-guards";
+import { ensureStartsWith } from "lib/utils";
+import {
+  revalidateTag,
+  unstable_cacheTag as cacheTag,
+  unstable_cacheLife as cacheLife,
+} from "next/cache";
+import { cookies, headers } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 // import { getProductRecommendationsQuery } from './queries/product';
 import {
   Cart,
@@ -45,61 +54,57 @@ import {
   ShippingMethodDataType,
   PaymentMethodDataType,
   PlacerOrderDataType,
-  RegisterDataType
-} from './types';
+  RegisterDataType,
+} from "./types";
 
 const domain = process.env.ODOO_STORE_DOMAIN
-  ? ensureStartsWith(process.env.ODOO_STORE_DOMAIN, 'https://')
-  : '';
+  ? ensureStartsWith(process.env.ODOO_STORE_DOMAIN, "https://")
+  : "";
 const endpoint = `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}`;
 const key = process.env.ODOO_STOREFRONT_ACCESS_TOKEN!;
 
-type ExtractVariables<T> = T extends { variables: object } ? T['variables'] : never;
+type ExtractVariables<T> = T extends { variables: object }
+  ? T["variables"]
+  : never;
 
 export async function odooFetch<T>({
-  cache = 'force-cache',
   headers,
   query,
-  method = 'GET',
-  tags,
-  variables,
   cartId,
-  is_session
+  method = "GET",
+  variables,
+  is_session,
 }: {
-  cache?: RequestCache;
   headers?: HeadersInit;
   query: string;
-  method?: string;
-  tags?: string[];
-  variables?: ExtractVariables<T>;
   cartId?: string;
+  method?: string;
+  variables?: ExtractVariables<T>;
   is_session?: boolean;
 }): Promise<{ status: number; body: T } | never> {
   try {
     let session;
     if (is_session) {
-      session = cookies().get(TOKEN)?.value;
+      session = (await cookies()).get(TOKEN)?.value;
     }
 
     if (isObject(headers) && session) {
-      headers['Authorization'] = `bearer ${session}`;
+      headers["Authorization"] = `bearer ${session}`;
     }
     const result = await fetch(`${endpoint}/${query}`, {
       method: method,
       headers: {
-        'Content-Type': 'application/json',
-        cartId: `${cartId ? `${cartId}` : ''}`,
+        "Content-Type": "application/json",
+        cartId: `${cartId ? `${cartId}` : ""}`,
         Authenticate: key,
         ...(session ? { Authorization: `bearer ${session}` } : {}),
-        ...headers
+        ...headers,
       },
       body:
         variables &&
         JSON.stringify({
-          ...(variables && variables)
+          ...(variables && variables),
         }),
-      cache,
-      ...(tags && { next: { tags } })
     });
 
     const body = await result.json();
@@ -110,21 +115,21 @@ export async function odooFetch<T>({
 
     return {
       status: result.status,
-      body
+      body,
     };
   } catch (e) {
     if (isShopifyError(e)) {
       throw {
-        cause: e.cause?.toString() || 'unknown',
+        cause: e.cause?.toString() || "unknown",
         status: e.status || 500,
         message: e.message,
-        query
+        query,
       };
     }
 
     throw {
       error: e,
-      query
+      query,
     };
   }
 }
@@ -142,18 +147,20 @@ const reshapeCart = (cart: OdooCart): any => {
   // }
   return {
     ...cart,
-    lines: removeEdgesAndNodes(cart.items)
+    lines: removeEdgesAndNodes(cart.items),
   };
 };
 
-const reshapeCollection = (collection?: OdooCollection): Collection | undefined => {
+const reshapeCollection = (
+  collection?: OdooCollection,
+): Collection | undefined => {
   if (!isObject(collection)) {
     return undefined;
   }
 
   return {
     ...collection,
-    path: `/search/${collection.url_key}`
+    path: `/search/${collection.url_key}`,
   };
 };
 
@@ -179,12 +186,15 @@ const reshapeImages = (images: ProductVariant[], productTitle: string) => {
     const filename = image.thumbnail.name.match(/.*\/(.*)\..*/)[1];
     return {
       ...image.thumbnail,
-      altText: image.thumbnail.name || `${productTitle} - ${filename}`
+      altText: image.thumbnail.name || `${productTitle} - ${filename}`,
     };
   });
 };
 
-const reshapeProduct = (product?: OdooProduct, filterHiddenProducts: boolean = true) => {
+const reshapeProduct = (
+  product?: OdooProduct,
+  filterHiddenProducts: boolean = true,
+) => {
   if (!product || filterHiddenProducts) {
     return undefined;
   }
@@ -193,7 +203,7 @@ const reshapeProduct = (product?: OdooProduct, filterHiddenProducts: boolean = t
   return {
     ...rest,
     images: reshapeImages(variants, product.name),
-    variants: removeEdgesAndNodes(variants)
+    variants: removeEdgesAndNodes(variants),
   };
 };
 
@@ -229,30 +239,29 @@ const reshapeHomeProducts = (products: OdooHomeCollection): any[] => {
 
 export async function createCart(): Promise<CreateCartType> {
   const res = await odooFetch<OdooCreateCartOperation>({
-    query: 'create-empty-cart',
-    method: 'POST',
-    cache: 'no-store',
-    is_session: true
+    query: "create-empty-cart",
+    method: "POST",
+    is_session: true,
   });
 
   return res.body?.data?.customerCart;
 }
 
 export async function addToCart(itemObject: {
-  cartId: string;
   cartItems: {
     id: number;
     quantity: number;
   }[];
 }): Promise<Cart> {
+  const cartId = (await cookies()).get("cartId")?.value!;
   const res = await odooFetch<OdooAddToCartOperation>({
-    query: 'addtocart',
-    method: 'POST',
+    query: "addtocart",
+    method: "POST",
     variables: {
-      ...itemObject
+      ...itemObject,
+      cartId,
     },
-    cache: 'no-store',
-    is_session: true
+    is_session: true,
   });
 
   return reshapeCart(res.body?.customerCart);
@@ -260,49 +269,48 @@ export async function addToCart(itemObject: {
 
 export async function removeFromCart(removeCartObj: {
   cartItemId: number;
-  cartId: string;
 }): Promise<Cart> {
+  const cartId = (await cookies()).get("cartId")?.value!;
   const res = await odooFetch<OdooRemoveFromCartOperation>({
-    query: 'remove-cart',
-    method: 'DELETE',
+    query: "remove-cart",
+    method: "DELETE",
     variables: {
-      ...removeCartObj
+      ...removeCartObj,
+      cartId,
     },
-    cache: 'no-store',
-    is_session: true
+    is_session: true,
   });
 
   return reshapeCart(res.body.removeCart);
 }
 
 export async function updateCart(updateCartObj: {
-  cartId: string;
   cartItems: {
     cart_item_id: number;
     quantity: number;
   }[];
 }): Promise<Cart> {
+  const cartId = (await cookies()).get("cartId")?.value!;
   const res = await odooFetch<OdooUpdateCartOperation>({
-    query: 'updatecart',
-    method: 'POST',
+    query: "updatecart",
+    method: "POST",
     variables: {
-      ...updateCartObj
+      ...updateCartObj,
+      cartId,
     },
-    cache: 'no-store',
-    is_session: true
+    is_session: true,
   });
 
   return reshapeCart(res.body.updateCart);
 }
 
-export async function getCart(cartId: string): Promise<Cart | undefined> {
+export async function getCart(): Promise<Cart | undefined> {
+  const cartId = (await cookies()).get("cartId")?.value!;
   const res = await odooFetch<OdooCartOperation>({
-    query: 'cart',
-    method: 'GET',
-    tags: [TAGS.cart],
+    query: "cart",
+    method: "GET",
     cartId: cartId,
-    cache: 'no-store',
-    is_session: true
+    is_session: true,
   });
 
   // Old carts becomes `null` when you checkout.
@@ -312,18 +320,23 @@ export async function getCart(cartId: string): Promise<Cart | undefined> {
   return reshapeCart(res.body.customerCart);
 }
 
-export async function getCollection(handle: string): Promise<Collection | undefined> {
+export async function getCollection(
+  handle: string,
+): Promise<Collection | undefined> {
+  "use cache";
+  cacheTag(TAGS.collections);
+  cacheLife("days");
+
   const res = await odooFetch<OdooCollectionOperation>({
-    query: 'category-list',
-    method: 'POST',
-    tags: [TAGS.collections],
+    query: "category-list",
+    method: "POST",
     variables: {
       filter: {
         url_key: {
-          eq: handle
-        }
-      }
-    }
+          eq: handle,
+        },
+      },
+    },
   });
 
   return reshapeCollection(res.body.category?.[0]);
@@ -333,30 +346,36 @@ export async function getCollectionProducts({
   collection,
   reverse,
   sortKey,
-  page
+  page,
 }: {
   collection: string;
   reverse?: boolean;
   sortKey?: string;
   page: string;
 }): Promise<Product> {
-  let handle: OdooFetchVariables = { search: '', pageSize: 12, currentPage: page };
+  "use cache";
+  let handle: OdooFetchVariables = {
+    search: "",
+    pageSize: 12,
+    currentPage: page,
+  };
 
   if (sortKey) {
-    const direction = reverse ? 'desc' : 'asc';
+    const direction = reverse ? "desc" : "asc";
     handle = { sort: { [sortKey.toLowerCase()]: direction }, ...handle };
   }
   if (collection) {
     handle = { filter: { category_url: { eq: collection } }, ...handle };
   }
+  cacheTag(TAGS.collections, TAGS.products);
+  cacheLife("days");
 
   const res = await odooFetch<OdooProductsOperation>({
-    query: 'product-list',
-    method: 'POST',
-    tags: [TAGS.collections, TAGS.products],
+    query: "product-list",
+    method: "POST",
     variables: {
-      ...handle
-    }
+      ...handle,
+    },
   });
 
   if (!isArray(res.body.products.items)) {
@@ -365,15 +384,19 @@ export async function getCollectionProducts({
 
   return {
     products: reshapeProducts(removeEdgesAndNodes(res.body.products.items)),
-    total: res.body.total_count ?? 0
+    total: res.body.total_count ?? 0,
   };
 }
 
-export async function getHomepageCollectionProducts(): Promise<OdooHomeCollection[] | any[]> {
+export async function getHomepageCollectionProducts(): Promise<
+  OdooHomeCollection[] | any[]
+> {
+  "use cache";
+  cacheTag(TAGS.collections, TAGS.products);
+  cacheLife("days");
+
   const res = await odooFetch<OdooHomepageCollection>({
-    query: 'homepage',
-    tags: [TAGS.collections, TAGS.products],
-    cache: 'no-cache'
+    query: "homepage",
   });
 
   if (!res.body.getHomePageData) {
@@ -384,83 +407,95 @@ export async function getHomepageCollectionProducts(): Promise<OdooHomeCollectio
 }
 
 export async function getCollections(): Promise<Collection[]> {
+  "use cache";
+  cacheTag(TAGS.collections);
+  cacheLife("days");
+
   const res = await odooFetch<OdooCollectionsOperation>({
-    query: 'category-list',
-    method: 'POST',
-    tags: [TAGS.collections]
+    query: "category-list",
+    method: "POST",
   });
 
   const odooCollections = removeEdgesAndNodes(res?.body?.category);
 
   const collections = [
     {
-      url_key: '',
-      title: '',
-      name: 'All',
-      description: 'All products',
-      meta_title: 'All',
-      meta_description: 'All products',
-      path: '/search',
-      updatedAt: new Date().toISOString()
+      url_key: "",
+      title: "",
+      name: "All",
+      description: "All products",
+      meta_title: "All",
+      meta_description: "All products",
+      path: "/search",
+      updatedAt: new Date().toISOString(),
     },
     // Filter out the `hidden` collections.
     // Collections that start with `hidden-*` need to be hidden on the search page.
     ...reshapeCollections(odooCollections).filter(
-      (collection) => !collection.url_key.startsWith('hidden')
-    )
+      (collection) => !collection.url_key.startsWith("hidden"),
+    ),
   ];
   return collections;
 }
 
 export async function getMenu(): Promise<MegaMenu[]> {
+  "use cache";
+  cacheTag(TAGS.collections);
+  cacheLife("days");
   const res = await odooFetch<OdooMenuOperation>({
-    query: 'mega-menu',
-    method: 'GET',
-    tags: [TAGS.collections]
+    query: "mega-menu",
+    method: "GET",
   });
 
-  return res.body?.data?.megaMenu.map((item: { title: string; url_key: string }) => {
-    if (item?.url_key !== '/') {
-      return {
-        title: item?.title,
-        path: `/search/${item.url_key
-          .replace(domain, '')
-          .replace('/collections', '/search')
-          .replace('/pages', '/search')}`
-      };
-    } else {
-      return {
-        title: 'All',
-        path: '/search'
-      };
-    }
-  });
+  return res.body?.data?.megaMenu.map(
+    (item: { title: string; url_key: string }) => {
+      if (item?.url_key !== "/") {
+        return {
+          title: item?.title,
+          path: `/search/${item.url_key
+            .replace(domain, "")
+            .replace("/collections", "/search")
+            .replace("/pages", "/search")}`,
+        };
+      } else {
+        return {
+          title: "All",
+          path: "/search",
+        };
+      }
+    },
+  );
 }
 
 export async function getFooterLinks(): Promise<Menu[]> {
+  "use cache";
+  cacheTag(TAGS.collections);
+  cacheLife("days");
   const res = await odooFetch<OdooFooterMenuOperation>({
-    query: 'footer',
-    method: 'GET',
-    tags: [TAGS.collections]
+    query: "footer",
+    method: "GET",
   });
 
   return (
     res?.body?.footerLinks.map(
-      (item: { updatedAt?: string; title: string; subLinks: FooterSubLinks[] }) => ({
+      (item: {
+        updatedAt?: string;
+        title: string;
+        subLinks: FooterSubLinks[];
+      }) => ({
         title: item.title,
         path: item.subLinks,
-        updateAt: new Date()
-      })
+        updateAt: new Date(),
+      }),
     ) || []
   );
 }
 
 export async function getPage(handle: { identifier: string }): Promise<Page> {
   const res = await odooFetch<OdooPageOperation>({
-    query: 'cms',
-    method: 'POST',
-    cache: 'no-store',
-    variables: { ...handle }
+    query: "cms",
+    method: "POST",
+    variables: { ...handle },
   });
 
   return res.body.cmsPage;
@@ -468,25 +503,29 @@ export async function getPage(handle: { identifier: string }): Promise<Page> {
 
 export async function getPages(): Promise<FooterSubLinks[]> {
   const res = await odooFetch<OdooFooterMenuOperation>({
-    query: 'footer',
-    method: 'GET',
-    cache: 'no-store'
+    query: "footer",
+    method: "GET",
   });
-  const flattenedSubLinks: FooterSubLinks[] = res.body.footerLinks.flatMap((item) => item.subLinks);
+  const flattenedSubLinks: FooterSubLinks[] = res.body.footerLinks.flatMap(
+    (item) => item.subLinks,
+  );
 
   return removeEdgesAndNodes(flattenedSubLinks);
 }
 
 export async function getProduct(pathUrl: string): Promise<Product> {
+  "use cache";
   const handle = { filter: { url_key: { eq: pathUrl } } };
 
+  cacheTag(TAGS.products);
+  cacheLife("days");
+
   const res = await odooFetch<OdooProductOperation>({
-    query: 'product-list',
-    method: 'POST',
-    tags: [TAGS.products],
+    query: "product-list",
+    method: "POST",
     variables: {
-      ...handle
-    }
+      ...handle,
+    },
   });
   if (!isArray(res.body.products.items)) {
     return { products: [], total: 0 };
@@ -494,7 +533,7 @@ export async function getProduct(pathUrl: string): Promise<Product> {
 
   return {
     products: reshapeProducts(removeEdgesAndNodes(res.body.products.items)),
-    total: res.body.total_count ?? 0
+    total: res.body.total_count ?? 0,
   };
 }
 
@@ -514,41 +553,47 @@ export async function getProducts({
   query,
   reverse,
   sortKey,
-  page
+  page,
 }: {
   query?: string;
   reverse?: boolean;
   sortKey?: string;
   page?: string;
 }): Promise<Product> {
-  let handle: OdooFetchVariables = { pageSize: LIMIT, currentPage: page || '1', filter: {} };
+  "use cache";
+  let handle: OdooFetchVariables = {
+    pageSize: LIMIT,
+    currentPage: page || "1",
+    filter: {},
+  };
 
   if (sortKey) {
-    const direction = reverse ? 'desc' : 'asc';
+    const direction = reverse ? "desc" : "asc";
     handle = { sort: { [sortKey.toLowerCase()]: direction }, ...handle };
   }
   if (query) {
     handle = { search: query, ...handle };
   }
 
+  cacheTag(TAGS.products);
+  cacheLife("days");
   const res = await odooFetch<OdooProductsOperation>({
-    query: 'product-list',
-    method: 'POST',
-    tags: [TAGS.products],
+    query: "product-list",
+    method: "POST",
     variables: {
-      ...handle
-    }
+      ...handle,
+    },
   });
   if (!isArray(res.body.products.items)) {
     return {
       products: [],
-      total: 0
+      total: 0,
     };
   }
 
   return {
     products: reshapeProducts(removeEdgesAndNodes(res.body.products.items)),
-    total: res.body.total_count ?? 0
+    total: res.body.total_count ?? 0,
   };
 }
 /**
@@ -557,93 +602,95 @@ export async function getProducts({
  */
 export async function getCountryList(): Promise<ShippingArrayDataType[]> {
   const res = await odooFetch<OdooCountriesOperation>({
-    query: 'country',
-    method: 'POST'
+    query: "country",
+    method: "POST",
   });
   return res.body?.countries;
 }
 
 export async function addShippingAddress(
-  shippingAddressInput: ShippingAddressInputType
+  shippingAddressInput: ShippingAddressInputType,
 ): Promise<shippingAddressType> {
   const res = await odooFetch<shippingAddressType>({
-    query: 'add-shipping-address',
-    method: 'POST',
+    query: "add-shipping-address",
+    method: "POST",
     variables: {
-      ...shippingAddressInput
+      ...shippingAddressInput,
     },
-    cache: 'no-store',
-    is_session: true
+    is_session: true,
   });
 
   return res.body;
 }
 
 export async function addShippingMethod(
-  input: ShippingMethodType
+  input: ShippingMethodType,
 ): Promise<ShippingMethodDataType> {
   const res = await odooFetch<ShippingMethodDataType>({
-    query: 'add-delivery-method',
-    method: 'POST',
+    query: "add-delivery-method",
+    method: "POST",
     variables: {
-      ...input
+      ...input,
     },
-    cache: 'no-store',
-    is_session: true
+    is_session: true,
   });
 
   return res.body;
 }
 
-export async function addPaymentMethod(input: PaymentMethodType): Promise<PaymentMethodDataType> {
+export async function addPaymentMethod(
+  input: PaymentMethodType,
+): Promise<PaymentMethodDataType> {
   const res = await odooFetch<PaymentMethodDataType>({
-    query: 'add-payment-method',
-    method: 'POST',
+    query: "add-payment-method",
+    method: "POST",
     variables: {
-      ...input
+      ...input,
     },
-    cache: 'no-store',
-    is_session: true
+    is_session: true,
   });
 
   return res?.body;
 }
 
-export async function createPlaceOrder(input: PlacerOrderInputType): Promise<PlacerOrderDataType> {
+export async function createPlaceOrder(
+  input: PlacerOrderInputType,
+): Promise<PlacerOrderDataType> {
   const res = await odooFetch<PlacerOrderDataType>({
-    query: 'place-order',
-    method: 'POST',
+    query: "place-order",
+    method: "POST",
     variables: {
-      ...input
+      ...input,
     },
-    cache: 'no-store',
-    is_session: true
+    is_session: true,
   });
 
   return res.body;
 }
 
-export async function createUserToLogin(input: RegisterInputType): Promise<RegisterDataType> {
+export async function createUserToLogin(
+  input: RegisterInputType,
+): Promise<RegisterDataType> {
   const res = await odooFetch<RegisterDataType>({
-    query: 'signup',
-    method: 'POST',
+    query: "signup",
+    method: "POST",
     variables: {
-      ...input
+      ...input,
     },
-    cache: 'no-store'
   });
 
   return res?.body;
 }
 
-export async function recoverUserLogin(input: { email: string }): Promise<RecoverLoginType> {
+export async function recoverUserLogin(input: {
+  email: string;
+}): Promise<RecoverLoginType> {
   const res = await odooFetch<RecoverLoginType>({
-    query: 'forgetPassword',
-    method: 'POST',
+    query: "forgetPassword",
+    method: "POST",
     variables: {
-      ...input
+      ...input,
     },
-    cache: 'no-store'
   });
   return res.body;
 }
@@ -652,10 +699,18 @@ export async function recoverUserLogin(input: { email: string }): Promise<Recove
 export async function revalidate(req: NextRequest): Promise<NextResponse> {
   // We always need to respond with a 200 status code to Shopify,
   // otherwise it will continue to retry the request.
-  const collectionWebhooks = ['collections/create', 'collections/delete', 'collections/update'];
-  const productWebhooks = ['products/create', 'products/delete', 'products/update'];
-  const topic = headers().get('x-shopify-topic') || 'unknown';
-  const secret = req.nextUrl.searchParams.get('secret');
+  const collectionWebhooks = [
+    "collections/create",
+    "collections/delete",
+    "collections/update",
+  ];
+  const productWebhooks = [
+    "products/create",
+    "products/delete",
+    "products/update",
+  ];
+  const topic = (await headers()).get("x-shopify-topic") || "unknown";
+  const secret = req.nextUrl.searchParams.get("secret");
   const isCollectionUpdate = collectionWebhooks.includes(topic);
   const isProductUpdate = productWebhooks.includes(topic);
 

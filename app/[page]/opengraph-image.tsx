@@ -1,7 +1,5 @@
-import OpengraphImage from 'components/opengraph-image';
-import { getPage } from 'lib/odoo';
-
-export const runtime = 'edge';
+import OpengraphImage from "components/opengraph-image";
+import { getPage } from "lib/odoo";
 
 export default async function Image({ params }: { params: { page: string } }) {
   const page = await getPage({ identifier: params.page });
