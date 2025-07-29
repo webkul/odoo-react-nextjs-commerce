@@ -1,9 +1,8 @@
-import { ForgetPasswordForm } from 'components/customer/login/forget-password';
+import { ForgetPasswordForm } from "components/customer/login/forget-password";
 
-export const runtime = 'edge';
 export const metadata = {
-  title: 'Search',
-  description: 'Search for products in the store.'
+  title: "Search",
+  description: "Search for products in the store.",
 };
 export default function ForgetPasswordPage() {
   return <ForgetPasswordForm />;

@@ -1,31 +1,40 @@
-import Grid from 'components/grid';
-import ProductGridItems from 'components/layout/product-grid-items';
-import Pagination from 'components/pagination';
-import { defaultSort, LIMIT, sorting } from 'lib/constants';
-import { getProducts } from 'lib/odoo';
+import Grid from "components/grid";
+import ProductGridItems from "components/layout/product-grid-items";
+import Pagination from "components/pagination";
+import { defaultSort, LIMIT, sorting } from "lib/constants";
+import { getProducts } from "lib/odoo";
 
 export const metadata = {
-  title: 'Search',
-  description: 'Search for products in the store.'
+  title: "Search",
+  description: "Search for products in the store.",
 };
 
-export default async function SearchPage({
-  searchParams
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+export default async function SearchPage(props: {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const { sort, q: searchValue, page } = searchParams as { [key: string]: string };
-  const { sortKey, reverse } = sorting.find((item) => item.slug === sort) || defaultSort;
+  const searchParams = await props.searchParams;
+  const {
+    sort,
+    q: searchValue,
+    page,
+  } = searchParams as { [key: string]: string };
+  const { sortKey, reverse } =
+    sorting.find((item) => item.slug === sort) || defaultSort;
 
-  const { products, total } = await getProducts({ sortKey, reverse, query: searchValue, page });
-  const resultsText = products?.length > 1 ? 'results' : 'result';
+  const { products, total } = await getProducts({
+    sortKey,
+    reverse,
+    query: searchValue,
+    page,
+  });
+  const resultsText = products?.length > 1 ? "results" : "result";
 
   return (
     <>
       {searchValue ? (
         <p className="mb-4">
           {products?.length === 0
-            ? 'There are no products that match '
+            ? "There are no products that match "
             : `Showing ${products?.length} ${resultsText} for `}
           <span className="font-bold">&quot;{searchValue}&quot;</span>
         </p>
@@ -38,7 +47,7 @@ export default async function SearchPage({
           {total > LIMIT ? (
             <nav
               aria-label="Collection pagination"
-              className="mb-2 mt-4 block items-center sm:flex"
+              className="items-center block mt-4 mb-2 sm:flex"
             >
               <Pagination
                 itemsPerPage={LIMIT}

@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import clsx from 'clsx';
-import { removeItem } from 'components/cart/actions';
-import LoadingDots from 'components/loading-dots';
-import type { CartItem } from 'lib/odoo/types';
-import { useFormState, useFormStatus } from 'react-dom';
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
+import { removeItem } from "components/cart/actions";
+import LoadingDots from "components/loading-dots";
+import type { CartItem } from "lib/odoo/types";
+import { useFormStatus } from "react-dom";
+import { useActionState } from "react";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -19,10 +20,10 @@ function SubmitButton() {
       aria-label="Remove cart item"
       aria-disabled={pending}
       className={clsx(
-        'ease flex h-[17px] w-[17px] items-center justify-center rounded-full bg-neutral-500 transition-all duration-200',
+        "ease flex h-[17px] w-[17px] items-center justify-center rounded-full bg-neutral-500 transition-all duration-200",
         {
-          'cursor-not-allowed px-0': pending
-        }
+          "cursor-not-allowed px-0": pending,
+        },
       )}
     >
       {pending ? (
@@ -35,12 +36,12 @@ function SubmitButton() {
 }
 
 export function DeleteItemButton({ item }: { item: CartItem }) {
-  const [message, formAction] = useFormState(removeItem, null);
+  const [message, formAction] = useActionState(removeItem, null);
   const itemId = item.cartItemId;
-  const actionWithVariant = formAction.bind(null, itemId);
+  const removeItemAction = formAction.bind(null, itemId);
 
   return (
-    <form action={actionWithVariant}>
+    <form action={removeItemAction}>
       <SubmitButton />
       <p aria-live="polite" className="sr-only" role="status">
         {message}

@@ -1,6 +1,17 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@plugin "@tailwindcss/container-queries";
+@plugin "@tailwindcss/typography";
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
 
 @media (prefers-color-scheme: dark) {
   html {
@@ -9,21 +20,23 @@
 }
 
 @supports (font: -apple-system-body) and (-webkit-appearance: none) {
-  img[loading='lazy'] {
+  img[loading="lazy"] {
     clip-path: inset(0.6px);
   }
 }
-
+@theme{
+  --breakpoint-2xl:106rem;
+}
 a,
 input,
 button {
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-900;
+  @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-900;
 }
 
 /* --------- Custom Css---------- */
 *::-webkit-scrollbar-track {
   -webkit-box-shadow: none;
-  @apply border-opacity-100 bg-white dark:bg-black;
+  @apply bg-white dark:bg-black/100;
 }
 
 *::-webkit-scrollbar {
@@ -36,4 +49,15 @@ button {
 
 .hiddenScrollBar::-webkit-scrollbar {
   @apply my-5 h-[6px] cursor-pointer bg-gray-300;
+}
+.animate-carousel {
+  animation: marquee 30s linear infinite;
+}
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }

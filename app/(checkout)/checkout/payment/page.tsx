@@ -1,20 +1,22 @@
-import FormPlaceHolder from 'components/checkout/place-holder';
-import { getCart } from 'lib/odoo';
-import dynamic from 'next/dynamic';
-import { cookies } from 'next/headers';
+import FormPlaceHolder from "components/checkout/place-holder";
+import { getCart } from "lib/odoo";
+import { cookies } from "next/headers";
+import PaymentPage from "~components/checkout/payment";
+import { Suspense } from "react";
 
-const PaymentPage = dynamic(() => import('components/checkout/payment'), {
-  loading: () => <FormPlaceHolder />,
-  ssr: false
-});
 const payment = async () => {
-  const cartId = cookies().get('cartId')?.value;
+  const cartId = (await cookies()).get("cartId")?.value;
   let cart;
   if (cartId) {
-    cart = await getCart(cartId);
+    cart = await getCart();
   }
 
-  return <PaymentPage cart={cart} />;
+  return (
+    <Suspense fallback={<FormPlaceHolder />}>
+      {" "}
+      <PaymentPage cart={cart} />
+    </Suspense>
+  );
 };
 
 export default payment;
